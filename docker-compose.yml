@@ -1,0 +1,14 @@
+version: '3.3'
+services:
+  postgres:
+    image: docker.io/postgres:10.3
+    restart: always
+    env_file: .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+    ports:
+      - '${POSTGRES_EXPOSE_PORT}:5432'
+    volumes:
+      - ./config/database:/docker-entrypoint-initdb.d
