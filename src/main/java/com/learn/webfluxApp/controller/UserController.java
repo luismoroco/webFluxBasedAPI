@@ -16,13 +16,13 @@ public class UserController {
     private UserRepository userRepository;
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/all")
+    @GetMapping("")
     public Flux<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/user/{id}")
+    @GetMapping("/{id}")
     public Mono<User> getUser(@PathVariable Integer id) {
         return userRepository.findById(id)
                 .flatMap(Mono::just)
@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/new")
+    @PostMapping("")
     public Mono<Object> make(@RequestBody User user) {
         return userRepository.findByUsername(user.getUsername())
                 .flatMap(userFound -> {
@@ -40,7 +40,7 @@ public class UserController {
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public Mono<User> updateUserById(@RequestBody User user, @PathVariable Integer id) {
         String newUsername = user.getUsername();
 
@@ -68,8 +68,10 @@ public class UserController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @DeleteMapping("/delete/{id}")
-    public void deleteById(@PathVariable Integer id) {
-        userRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public Mono<String> deleteById(@PathVariable Integer id) {
+        return userRepository.findById(id)
+                .flatMap(user -> userRepository.deleteById(id).thenReturn("User deleted successfully"))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "id NOT FOUND: " + id)));
     }
 }
